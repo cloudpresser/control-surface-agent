@@ -4,6 +4,8 @@ A control surface for supervised AI decision workflows.
 
 This repository is a thesis artifact, not a chatbot demo. It demonstrates a bounded decision workflow through a real scenario, but the point is the supervision architecture: explicit intent framing, explicit planning, execution telemetry, reconciliation, operator intervention, and recovery after feedback.
 
+The reasoning steps are agentic. They use OpenAI in the same bounded pattern used in `agent-memory-failure-demo`: a shared client/config layer, explicit prompts per step, strict structured outputs, and deterministic tool/state orchestration around the model calls.
+
 ## What This Repo Proves
 
 - AI decision systems should expose a control surface, not just a chat transcript.
@@ -42,6 +44,7 @@ This is:
 
 - a control surface for supervised decision workflows
 - a minimal but real end-to-end system with file-backed run state
+- OpenAI-backed agentic reasoning for framing, planning, fit analysis, verdict generation, and reconciliation
 - a demonstration of telemetry and reconciliation as first-class runtime concerns
 - a feedback loop where operator correction changes downstream behavior
 
@@ -130,8 +133,26 @@ The eval layer is small on purpose. It checks:
 - retrieval behavior
 - evidence coverage in the artifact
 - recovery after operator correction
+- deterministic stub-mode behavior for local tests and screenshots
 
 The most important evaluation is not accuracy in the abstract. It is whether the system improves after structured feedback.
+
+## Agent Runtime
+
+The system supports two execution modes:
+
+- `live` — reasoning steps call OpenAI using `MODEL` (default `gpt-5.4`)
+- `stub` — the same workflow runs with deterministic local outputs, which keeps tests and screenshots reproducible without an API key
+
+Stub mode activates automatically when `OPENAI_API_KEY` is not set, or explicitly with `CONTROL_SURFACE_STUB=1`.
+
+The operator console surfaces:
+
+- agent mode
+- model name
+- total tokens
+- latency
+- per-step model/token/latency telemetry
 
 ## Project Structure
 
@@ -159,6 +180,11 @@ cd backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+
+# optional: live model mode
+export OPENAI_API_KEY=sk-...
+export MODEL=gpt-5.4
+
 uvicorn app:app --reload
 ```
 
@@ -171,6 +197,12 @@ npm run dev
 ```
 
 If your backend is not on `http://127.0.0.1:8000`, set `NEXT_PUBLIC_API_BASE_URL` before running the frontend.
+
+If you want deterministic local runs without calling OpenAI:
+
+```bash
+export CONTROL_SURFACE_STUB=1
+```
 
 ## Thesis
 

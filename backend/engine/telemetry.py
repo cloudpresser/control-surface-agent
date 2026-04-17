@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from schemas import TelemetryEvent
+from schemas import TelemetryEvent, UsageMetrics
 
 
 def record_event(
@@ -11,6 +11,7 @@ def record_event(
     confidence_before: float,
     confidence_after: float,
     evidence_ids: list[str] | None = None,
+    usage: UsageMetrics | None = None,
 ) -> TelemetryEvent:
     return TelemetryEvent(
         step_id=step_id,
@@ -20,4 +21,5 @@ def record_event(
         confidence_before=round(confidence_before, 2),
         confidence_after=round(confidence_after, 2),
         evidence_ids=evidence_ids or [],
+        usage=usage,
     )

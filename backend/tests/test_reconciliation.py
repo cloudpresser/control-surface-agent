@@ -20,7 +20,7 @@ def test_lightweight_reconciliation_flags_missing_context_on_compare_step() -> N
         "evidence": [],
     }
 
-    report = lightweight_reconcile(run_state, "Checked fit without context.")
+    report = lightweight_reconcile(run_state, "Checked fit without context.").value
 
     assert report.plan_drift is True
     assert report.recommended_action == "force_retrieval"
@@ -38,7 +38,7 @@ def test_full_reconciliation_flags_claims_without_evidence() -> None:
         },
     }
 
-    report = full_reconcile(run_state)
+    report = full_reconcile(run_state).value
 
     assert report.plan_drift is True
     assert report.recommended_action == "force_retrieval"

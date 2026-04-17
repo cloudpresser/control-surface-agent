@@ -14,6 +14,7 @@ from engine.executors import (
     retrieve_company_context,
 )
 from engine.feedback_loop import apply_operator_action
+from engine.base import get_agent_mode, get_model
 from engine.intent_framer import frame_intent
 from engine.planner import build_plan
 from engine.reconciler import full_reconcile, lightweight_reconcile
@@ -29,6 +30,7 @@ from schemas import (
     ReasoningClaim,
     RunInput,
     RunState,
+    UsageMetrics,
 )
 
 
@@ -118,9 +120,32 @@ def _company_context_for_run(run_state: RunState) -> dict | None:
     return example.get("company_context")
 
 
+def _merge_usage(run_state: RunState, usage: UsageMetrics | None) -> None:
+    if usage is None:
+        return
+    if run_state.usage_summary is None:
+        run_state.usage_summary = UsageMetrics(
+            model=usage.model,
+            agent_mode=usage.agent_mode,
+            prompt_tokens=usage.prompt_tokens,
+            completion_tokens=usage.completion_tokens,
+            total_tokens=usage.total_tokens,
+            latency_ms=usage.latency_ms,
+        )
+        return
+    run_state.usage_summary.prompt_tokens += usage.prompt_tokens
+    run_state.usage_summary.completion_tokens += usage.completion_tokens
+    run_state.usage_summary.total_tokens += usage.total_tokens
+    run_state.usage_summary.latency_ms += usage.latency_ms
+    run_state.usage_summary.model = usage.model
+    run_state.usage_summary.agent_mode = usage.agent_mode
+
+
 def _apply_reconciliation(run_state: RunState, scope: str, summary: str) -> None:
-    report = lightweight_reconcile(run_state.model_dump(), summary) if scope == "lightweight" else full_reconcile(run_state.model_dump())
+    invocation = lightweight_reconcile(run_state.model_dump(), summary) if scope == "lightweight" else full_reconcile(run_state.model_dump())
+    report = invocation.value
     run_state.reconciliation_reports.append(report)
+    _merge_usage(run_state, invocation.usage)
     run_state.confidence = round(max(0.1, min(0.95, run_state.confidence + report.confidence_adjustment)), 2)
     if report.recommended_action in {"force_retrieval", "retry_with_constraint"} and run_state.status != "completed":
         run_state.status = "needs_operator"
@@ -148,8 +173,9 @@ def _run_step(run_state: RunState) -> RunState:
         run_state.artifacts_by_step[step.id] = result.output
         run_state.confidence = round(result.confidence, 2)
         run_state.telemetry.append(
-            record_event(step.id, result.tool_name, result.status, "Extracted role requirements from job description.", confidence_before, run_state.confidence)
+            record_event(step.id, result.tool_name, result.status, "Extracted role requirements from job description.", confidence_before, run_state.confidence, usage=result.usage)
         )
+        _merge_usage(run_state, result.usage)
         _complete_step(run_state, step.id)
         _apply_reconciliation(run_state, "lightweight", "Checked whether the extracted requirements support the current plan.")
 
@@ -176,8 +202,10 @@ def _run_step(run_state: RunState) -> RunState:
                 confidence_before,
                 run_state.confidence,
                 [item.id for item in run_state.evidence],
+                result.usage,
             )
         )
+        _merge_usage(run_state, result.usage)
         _complete_step(run_state, step.id)
         _apply_reconciliation(run_state, "lightweight", "Checked whether evidence coverage is sufficient after retrieval.")
         return run_state
@@ -197,8 +225,10 @@ def _run_step(run_state: RunState) -> RunState:
                 confidence_before,
                 run_state.confidence,
                 [item.id for item in run_state.evidence],
+                result.usage,
             )
         )
+        _merge_usage(run_state, result.usage)
         _complete_step(run_state, step.id)
         _apply_reconciliation(run_state, "lightweight", "Checked whether the fit analysis drifted from the original objective.")
         return run_state
@@ -219,8 +249,10 @@ def _run_step(run_state: RunState) -> RunState:
                 confidence_before,
                 run_state.confidence,
                 [item.id for item in run_state.evidence],
+                result.usage,
             )
         )
+        _merge_usage(run_state, result.usage)
         _complete_step(run_state, step.id)
         _apply_reconciliation(run_state, "lightweight", "Checked whether the risk analysis surfaced enough uncertainty.")
         return run_state
@@ -232,14 +264,7 @@ def _run_step(run_state: RunState) -> RunState:
         evidence_ids = [item.id for item in run_state.evidence]
         result = generate_verdict(intent, comparison, unknowns, evidence_ids)
         artifact_output = result.output
-        run_state.artifact = DecisionArtifact(
-            verdict=artifact_output["verdict"],
-            reasoning=[ReasoningClaim(**claim) for claim in artifact_output["reasoning"]],
-            risks=artifact_output["risks"],
-            unknowns=artifact_output["unknowns"],
-            next_actions=artifact_output["next_actions"],
-            confidence=artifact_output["confidence"],
-        )
+        run_state.artifact = DecisionArtifact.model_validate(artifact_output)
         run_state.confidence = artifact_output["confidence"]
         run_state.telemetry.append(
             record_event(
@@ -250,8 +275,10 @@ def _run_step(run_state: RunState) -> RunState:
                 confidence_before,
                 run_state.confidence,
                 evidence_ids,
+                result.usage,
             )
         )
+        _merge_usage(run_state, result.usage)
         _complete_step(run_state, step.id)
         _apply_reconciliation(run_state, "full", "")
         if run_state.status != "needs_operator":
@@ -263,7 +290,7 @@ def _run_step(run_state: RunState) -> RunState:
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok"}
+    return {"status": "ok", "model": get_model(), "agent_mode": get_agent_mode()}
 
 
 @app.get("/examples", response_model=list[ExampleMetadata])
@@ -281,9 +308,15 @@ def create_run_endpoint(run_input: RunInput) -> dict:
             run_input.company_name = example["job"]["company_name"]
 
     run_state = create_run(run_input)
-    run_state.intent = frame_intent(run_input)
-    needs_retrieval = decide_retrieval(run_input.company_name, run_input.job_description)
-    run_state.plan = build_plan(run_state.intent, needs_retrieval)
+    intent_invocation = frame_intent(run_input)
+    run_state.intent = intent_invocation.value
+    _merge_usage(run_state, intent_invocation.usage)
+    retrieval_invocation = decide_retrieval(run_input.company_name, run_input.job_description)
+    run_state.artifacts_by_step["initial_retrieval_decision"] = retrieval_invocation.value.model_dump()
+    _merge_usage(run_state, retrieval_invocation.usage)
+    plan_invocation = build_plan(run_state.intent, retrieval_invocation.value)
+    run_state.plan = plan_invocation.value
+    _merge_usage(run_state, plan_invocation.usage)
     run_state.confidence = run_state.plan.confidence
     save_run_state(run_state)
     return {"run_id": run_state.run_id, "status": run_state.status, "run_state": run_state}

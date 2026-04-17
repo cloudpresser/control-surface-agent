@@ -11,6 +11,7 @@ RunStatus = Literal["ready", "in_progress", "needs_operator", "completed", "esca
 ReconciliationScope = Literal["lightweight", "full"]
 AlignmentLevel = Literal["strong", "partial", "weak"]
 CoverageLevel = Literal["sufficient", "partial", "insufficient"]
+AgentMode = Literal["live", "stub"]
 
 
 def utc_now() -> str:
@@ -49,6 +50,43 @@ class Plan(BaseModel):
     confidence: float
 
 
+class RetrievalDecision(BaseModel):
+    query: str
+    purpose: str
+    needs_retrieval: bool
+    sufficiency: CoverageLevel
+    confidence: float
+
+
+class RoleRequirements(BaseModel):
+    themes: list[str] = Field(default_factory=list)
+    salary_band: str | None = None
+    remote: bool = False
+    seniority: str
+    ambiguity_flags: list[str] = Field(default_factory=list)
+
+
+class FitComparison(BaseModel):
+    fit_score: float
+    overlap: list[str] = Field(default_factory=list)
+    strengths: list[str] = Field(default_factory=list)
+    gaps: list[str] = Field(default_factory=list)
+
+
+class UnknownAssessment(BaseModel):
+    unknowns: list[str] = Field(default_factory=list)
+    risks: list[str] = Field(default_factory=list)
+
+
+class UsageMetrics(BaseModel):
+    model: str
+    agent_mode: AgentMode
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    total_tokens: int = 0
+    latency_ms: int = 0
+
+
 class EvidenceItem(BaseModel):
     id: str
     source_type: str
@@ -66,6 +104,7 @@ class ToolResult(BaseModel):
     output: dict[str, Any]
     confidence: float
     failure_reason: str | None = None
+    usage: UsageMetrics | None = None
 
 
 class TelemetryEvent(BaseModel):
@@ -77,6 +116,7 @@ class TelemetryEvent(BaseModel):
     confidence_before: float
     confidence_after: float
     evidence_ids: list[str] = Field(default_factory=list)
+    usage: UsageMetrics | None = None
 
 
 class ReconciliationReport(BaseModel):
@@ -133,6 +173,7 @@ class RunState(BaseModel):
     artifacts_by_step: dict[str, dict[str, Any]] = Field(default_factory=dict)
     artifact: DecisionArtifact | None = None
     confidence: float = 0.5
+    usage_summary: UsageMetrics | None = None
 
 
 class ExecuteRequest(BaseModel):

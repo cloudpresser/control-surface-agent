@@ -31,6 +31,7 @@ def test_run_flow_and_artifact() -> None:
     run_state = execute_response.json()
     assert run_state["artifact"]["verdict"] in {"pursue", "conditionally_pursue"}
     assert len(run_state["reconciliation_reports"]) >= 2
+    assert run_state["usage_summary"]["agent_mode"] == "stub"
 
     artifact_response = client.get(f"/runs/{run_id}/artifact")
     assert artifact_response.status_code == 200
@@ -55,6 +56,14 @@ def test_intent_constraints_are_deduplicated() -> None:
     constraints = response.json()["run_state"]["intent"]["constraints"]
     assert constraints.count("optimize for long-term growth") == 1
     assert constraints.count("avoid generic advice") == 1
+
+
+def test_health_reports_agent_mode() -> None:
+    response = client.get("/health")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["agent_mode"] == "stub"
+    assert body["model"]
 
 
 def test_feedback_resets_retrieval_step() -> None:

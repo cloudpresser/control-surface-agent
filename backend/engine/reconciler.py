@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from typing import Any
 
+from engine.base import AgentInvocation, invoke_structured
 from schemas import ReconciliationReport
 
 
-def lightweight_reconcile(run_state: dict[str, Any], summary: str) -> ReconciliationReport:
+def _stub_lightweight_reconcile(run_state: dict[str, Any], summary: str) -> ReconciliationReport:
     evidence_count = len(run_state.get("evidence", []))
     confidence = run_state.get("confidence", 0.5)
     plan_drift = False
@@ -40,7 +41,16 @@ def lightweight_reconcile(run_state: dict[str, Any], summary: str) -> Reconcilia
     )
 
 
-def full_reconcile(run_state: dict[str, Any]) -> ReconciliationReport:
+def lightweight_reconcile(run_state: dict[str, Any], summary: str) -> AgentInvocation[ReconciliationReport]:
+    return invoke_structured(
+        "reconcile_lightweight",
+        {"run_state": run_state, "summary": summary},
+        ReconciliationReport,
+        lambda: _stub_lightweight_reconcile(run_state, summary),
+    )
+
+
+def _stub_full_reconcile(run_state: dict[str, Any]) -> ReconciliationReport:
     artifact = run_state.get("artifact") or {}
     evidence_count = len(run_state.get("evidence", []))
     claims = artifact.get("reasoning", [])
@@ -74,4 +84,13 @@ def full_reconcile(run_state: dict[str, Any]) -> ReconciliationReport:
         confidence_adjustment=adjustment,
         recommended_action=recommended_action,
         summary="Full reconciliation before final artifact presentation.",
+    )
+
+
+def full_reconcile(run_state: dict[str, Any]) -> AgentInvocation[ReconciliationReport]:
+    return invoke_structured(
+        "reconcile_full",
+        {"run_state": run_state},
+        ReconciliationReport,
+        lambda: _stub_full_reconcile(run_state),
     )

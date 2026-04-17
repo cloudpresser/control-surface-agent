@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from engine.base import AgentInvocation, invoke_structured
 from schemas import Intent, RunInput
 
 
@@ -10,7 +11,7 @@ DEFAULT_CONSTRAINTS = [
 ]
 
 
-def frame_intent(run_input: RunInput) -> Intent:
+def _stub_intent(run_input: RunInput) -> Intent:
     combined_constraints = list(dict.fromkeys(DEFAULT_CONSTRAINTS + run_input.constraints))
     missing_information = [
         "team structure",
@@ -31,4 +32,17 @@ def frame_intent(run_input: RunInput) -> Intent:
             "next actions for the operator",
         ],
         missing_information=missing_information,
+    )
+
+
+def frame_intent(run_input: RunInput) -> AgentInvocation[Intent]:
+    return invoke_structured(
+        "intent_framer",
+        {
+            "company_name": run_input.company_name,
+            "job_description": run_input.job_description,
+            "constraints": list(dict.fromkeys(DEFAULT_CONSTRAINTS + run_input.constraints)),
+        },
+        Intent,
+        lambda: _stub_intent(run_input),
     )
