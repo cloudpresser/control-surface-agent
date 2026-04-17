@@ -1,0 +1,35 @@
+{
+  "job": {
+    "company_name": "Stripe",
+    "job_description": "Engineering Manager, Developer Productivity AI. Remote US. Compensation $214,600 - $321,800. Lead a new team focused on LLM agents for engineering workflow automation. Work across the company to transform how engineers work.",
+    "title": "Engineering Manager, Developer Productivity AI"
+  },
+  "profile": {
+    "id": "luiz_default",
+    "keywords": ["ai", "agents", "developer productivity", "python", "typescript", "manager", "remote"],
+    "leadership_scope": true,
+    "thesis": "I build control systems for intelligent software."
+  },
+  "company_context": {
+    "id": "ctx_stripe_1",
+    "title": "Stripe company context",
+    "summary": "Stripe has a strong engineering culture, visible investment in developer productivity, active AI development research, and compensation aligned with the operator's target. The role fits the control-systems-for-intelligent-software thesis unusually well.",
+    "score": 0.86,
+    "purpose": "understand company environment",
+    "sufficiency": "partial",
+    "content_ref": "backend/fixtures/company_context/stripe.md",
+    "strengths": [
+      "Dedicated developer productivity focus",
+      "Visible AI engineering work",
+      "Strong compensation and reputation"
+    ],
+    "risks": [
+      "High performance bar",
+      "Team structure and decision rights are still unclear"
+    ],
+    "unknowns": [
+      "team structure",
+      "performance expectations"
+    ]
+  }
+}

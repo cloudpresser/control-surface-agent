@@ -1,0 +1,25 @@
+{
+  "job": {
+    "company_name": "Pinecone Labs",
+    "job_description": "Senior Applied ML Researcher. Remote US. Compensation $220,000 - $260,000. Focus on retrieval modeling, ranking, and experimentation.",
+    "title": "Senior Applied ML Researcher"
+  },
+  "profile": {
+    "id": "luiz_default",
+    "keywords": ["ai", "agents", "developer productivity", "python", "typescript", "manager", "remote"],
+    "leadership_scope": true,
+    "thesis": "I build control systems for intelligent software."
+  },
+  "company_context": {
+    "id": "ctx_pinecone_1",
+    "title": "Pinecone Labs company context",
+    "summary": "Strong company and strong compensation, but the role is more research-oriented than control-surface and supervision oriented.",
+    "score": 0.8,
+    "purpose": "understand company environment",
+    "sufficiency": "partial",
+    "content_ref": null,
+    "strengths": ["Compensation", "AI relevance", "Remote"],
+    "risks": ["Research orientation may be a poor fit"],
+    "unknowns": ["day-to-day implementation depth"]
+  }
+}

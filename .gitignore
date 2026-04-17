@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+node_modules/
+.next/
+dist/
+coverage/
+.DS_Store
+backend/data/runs/
+backend/server.log
+backend/server.pid
+frontend/server.log
+frontend/server.pid
+frontend/playwright-report/
+frontend/test-artifacts/
+frontend/test-results/

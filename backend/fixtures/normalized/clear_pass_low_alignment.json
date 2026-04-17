@@ -1,0 +1,25 @@
+{
+  "job": {
+    "company_name": "LegacySecure",
+    "job_description": "Senior Security Engineer. Hybrid in office three days a week. Compensation $130,000 - $170,000. Focus on security operations, compliance controls, and incident response.",
+    "title": "Senior Security Engineer"
+  },
+  "profile": {
+    "id": "luiz_default",
+    "keywords": ["ai", "agents", "developer productivity", "python", "typescript", "manager", "remote"],
+    "leadership_scope": true,
+    "thesis": "I build control systems for intelligent software."
+  },
+  "company_context": {
+    "id": "ctx_legacysecure_1",
+    "title": "LegacySecure company context",
+    "summary": "Stable enterprise security vendor, but the role is far from the operator's thesis, below compensation targets, and not remote.",
+    "score": 0.65,
+    "purpose": "understand company environment",
+    "sufficiency": "partial",
+    "content_ref": "backend/fixtures/company_context/stripe.md",
+    "strengths": ["Stable business"],
+    "risks": ["Hybrid requirement", "Compensation below target", "Thesis mismatch"],
+    "unknowns": ["actual org mandate"]
+  }
+}

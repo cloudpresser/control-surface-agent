@@ -1,0 +1,25 @@
+{
+  "job": {
+    "company_name": "OrbitFlow",
+    "job_description": "Senior AI Platform Engineer. Remote possible. Build agent workflows and orchestration systems. Compensation not listed.",
+    "title": "Senior AI Platform Engineer"
+  },
+  "profile": {
+    "id": "luiz_default",
+    "keywords": ["ai", "agents", "developer productivity", "python", "typescript", "manager", "remote"],
+    "leadership_scope": true,
+    "thesis": "I build control systems for intelligent software."
+  },
+  "company_context": {
+    "id": "ctx_orbitflow_1",
+    "title": "OrbitFlow company context",
+    "summary": "Interesting role framing, but company stability, comp, and actual product surface remain unclear.",
+    "score": 0.71,
+    "purpose": "understand company environment",
+    "sufficiency": "partial",
+    "content_ref": null,
+    "strengths": ["Thesis-adjacent role framing"],
+    "risks": ["Compensation not listed", "Thin context"],
+    "unknowns": ["company stability", "team mandate", "performance expectations"]
+  }
+}
