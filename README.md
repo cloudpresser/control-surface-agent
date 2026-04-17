@@ -94,6 +94,12 @@ Panels:
 
 The reconciliation panel is central because it is the heart of the thesis: a script can execute, but a control system continuously checks divergence between plan and reality.
 
+Live mid-run view:
+
+![Live mid-run control surface](docs/live-mid-run.png)
+
+This screenshot shows the console in `live` mode after initialization, with the explicit plan visible, operator controls pinned high in the left column, and the bottom telemetry strip ready to expand into a full trace.
+
 ## Example Run
 
 The normal flow is:
