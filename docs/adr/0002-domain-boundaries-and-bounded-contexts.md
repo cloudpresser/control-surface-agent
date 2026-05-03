@@ -14,6 +14,9 @@ telemetry-driven governance, and operator remediation can evolve and scale indep
 Authentication is an example of a separate concern, but it is not being designed into the
 framework at this stage.
 
+Because the framework is modeled as a control loop, these boundaries must preserve a clean
+split between sensing, decision, actuation, and operator intervention.
+
 ## Decision
 
 The framework will adopt bounded contexts aligned to core runtime responsibilities.
@@ -21,11 +24,11 @@ The framework will adopt bounded contexts aligned to core runtime responsibiliti
 The initial bounded contexts are:
 
 - Orchestration: workflow state transitions, step scheduling, dependency handling, and run
-  lifecycle management
+  lifecycle management, including routing and control-policy application
 - Inference: model invocation, prompt execution, model usage reporting, and provider-specific
   adaptation
-- Telemetry: runtime event capture, eval hook results, audit traces, confidence signals, and
-  metrics derived from runs
+- Telemetry: runtime event capture, eval hook results, causal event history, audit traces,
+  observability integration, confidence signals, and metrics derived from runs
 - Remediation: operator-triggered or policy-triggered recovery actions executed by
   code-defined remediation agents
 - Operator Control Surface: monitoring views, intervention actions, and operator-facing run
@@ -47,10 +50,15 @@ first-class bounded context inside this repository.
 Orchestration is the core domain because it owns workflow progress and policy application.
 Inference is separated because model providers, invocation semantics, and cost controls will
 change faster than workflow semantics. Telemetry is separated because runtime observability
-and eval data must remain available even when execution strategies change. Remediation is
-separated because corrective actions are part of the runtime system, not just an operator UI
-detail. The operator surface is separated because it serves monitoring and intervention rather
-than workflow execution.
+and eval data must remain available even when execution strategies change. It is the sensing
+layer of the control loop and owns the causal event history needed to explain decisions across
+the stack. Remediation is separated because corrective actions are part of the runtime system,
+not just an operator UI detail. The operator surface is separated because it serves monitoring
+and intervention rather than workflow execution.
+
+Routing stays inside orchestration rather than telemetry. Telemetry reports the facts and
+signals that the control loop observes. Orchestration applies policy to those signals and
+chooses the next action.
 
 ## Consequences
 
