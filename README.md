@@ -136,6 +136,7 @@ Production reliability is a closed loop, not a pipeline.
 Short target-state overview:
 
 - [Architecture Overview](docs/architecture-overview.md)
+- [Roadmap](docs/roadmap.md) - from the thesis prototype to a distributed control system, with milestones for runtime, workflows, dashboard, and governance integration
 - [Architecture Decision Records](docs/adr/README.md)
 
 ```text
