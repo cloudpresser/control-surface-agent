@@ -133,6 +133,11 @@ The example domain is job opportunity evaluation because it is real, evidence-ri
 
 Production reliability is a closed loop, not a pipeline.
 
+Short target-state overview:
+
+- [Architecture Overview](docs/architecture-overview.md)
+- [Architecture Decision Records](docs/adr/README.md)
+
 ```text
                     ┌────────────────────┐
                     │      Operator      │
