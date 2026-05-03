@@ -12,6 +12,10 @@ custom workflows without turning each new workflow into a fork of the framework.
 The system also needs to support operator intervention, remediation paths, eval hook points,
 and runtime routing decisions. Those concerns cannot remain hidden in ad hoc imperative logic.
 
+All durable behavior is defined in code. Workflow structure, gates, routing allowances,
+remediation entry points, and related control semantics should remain versioned, repo-visible,
+and reviewable as code-defined behavior.
+
 ## Decision
 
 Workflows will be defined in code as versioned compositions of steps, transitions, and
@@ -21,6 +25,9 @@ Workflow definitions are framework inputs. They are not generated at runtime as 
 source of truth, and they are not embedded as one-off orchestration branches in the control
 plane.
 
+Workflows define structured execution and workflow-bound human control. They do not need to
+encode the entire supervisory surface of the system.
+
 ## Workflow Model
 
 A workflow definition must include:
@@ -28,6 +35,7 @@ A workflow definition must include:
 - workflow identifier and version
 - declared step graph and dependency rules
 - step kinds and execution contracts
+- workflow-bound gate definitions where human input is required
 - allowed routing options per step
 - remediation entry points
 - telemetry and eval hook points
@@ -43,6 +51,15 @@ Initial step kinds should support at least:
 - eval hook
 - human approval or escalation
 - artifact emission
+
+Workflow-bound gates should define at least:
+
+- the expected response shape
+- pause and resume semantics
+- timeout or escalation behavior when no response arrives
+
+Async supervisory control, including remediation escalation into future system evolution, is
+not required to be encoded as workflow structure.
 
 ## Why Code-Defined
 
@@ -87,3 +104,8 @@ The first objective is a robust code-defined workflow framework for engineering 
 The current canonical plan can be treated as the first workflow definition and moved behind a
 workflow abstraction. Existing planner behavior can then evolve from generating one fixed plan
 to selecting and instantiating workflow definitions with runtime policy attached.
+
+As execution evolves beyond the current prototype, workflow definitions should absorb explicit
+workflow-bound pause and resume behavior while leaving broader supervisory controls outside the
+workflow graph unless those controls are intentionally promoted into durable code-defined
+behavior.

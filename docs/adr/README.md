@@ -16,3 +16,5 @@ from a single-run thesis prototype toward a distributed agent systems framework.
 - [0003: Code-Defined Workflow Definitions](0003-code-defined-workflow-definitions.md)
 - [0004: Dashboard for Distributed Runs and Remediation](0004-dashboard-for-distributed-runs-and-remediation.md)
 - [0005: Telemetry, Causality, and Runtime Routing](0005-telemetry-causality-and-runtime-routing.md)
+- [0006: Execution API and Human Control Modes](0006-execution-api-and-human-control-modes.md)
+- [0007: Run Remediation, System Evolution, and External Governance](0007-run-remediation-system-evolution-and-external-governance.md)

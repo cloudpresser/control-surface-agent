@@ -40,7 +40,11 @@ The normalized event stream is the framework's source of truth for:
 - causal relationships between runtime and orchestration decisions
 - telemetry-hosted eval results
 - routing inputs and routing outcomes
-- remediation triggers and outcomes
+- remediation triggers and remediation outcomes
+- escalation decisions and explicit scope selections
+- emitted `evolution candidate` artifacts
+- emitted `repo_change` artifacts when present
+- external governance, evaluation, or approval references when present
 - operator interventions that change the control path
 
 This event model is framework-native. It must not be replaced by runtime-specific or
@@ -66,6 +70,9 @@ The full event taxonomy may evolve, but normalized events must support at least:
 These fields create a causal chain without forcing the framework to over-specify the entire
 event vocabulary too early.
 
+That causal chain must be able to explain not only why a run behaved the way it did, but also
+how a run remediation became a candidate for future code-defined behavior.
+
 ## Routing Inputs
 
 Routing decisions may consider:
@@ -86,6 +93,15 @@ Routing decisions may consider:
 Backpressure signals are first-class routing inputs. The framework must treat queue wait,
 admission failure, saturation, and execution delay as control signals rather than as passive
 observability data.
+
+The causal chain for broader system evolution should be representable as:
+
+- runtime signal
+- remediation action
+- escalation decision
+- explicit scope selection
+- `evolution candidate` emission or `repo_change` generation
+- external validation or approval reference when available
 
 ## Routing Outputs
 
@@ -117,7 +133,8 @@ the allowed runtime options based on policy and current signals.
 OpenTelemetry fits this architecture as the cross-stack tracing and observability layer.
 
 Every service and worker should propagate trace context so that a single run can be followed
-across control plane, runtime adapter, workers, remediation agents, and supporting services.
+across control plane, runtime adapter, workers, remediation agents, product clients,
+dashboard clients, and supporting services.
 
 OpenTelemetry complements the normalized event model by providing:
 
