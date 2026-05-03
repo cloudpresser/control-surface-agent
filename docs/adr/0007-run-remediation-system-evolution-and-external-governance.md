@@ -14,6 +14,9 @@ reveal an underspecified part of the system. Operators need a disciplined way to
 local remediation should remain run-scoped and when it should become a candidate for broader
 code-defined behavior change.
 
+That remediation may originate inside a wrapped execution system such as Strands and then be
+projected into the control layer as a structured control event.
+
 ## Decision
 
 Run remediation is the starting point for broader system evolution.
@@ -40,7 +43,7 @@ Examples include:
 - changing how a blocked run should proceed
 - synthesizing a correction that addresses the current run
 
-Run remediation is part of the active control loop. It is grounded in concrete runtime context
+Run remediation is part of the active control loop. It is grounded in concrete execution context
 and should always be causally linked to the run signals that required it.
 
 ## Escalation for Evolution

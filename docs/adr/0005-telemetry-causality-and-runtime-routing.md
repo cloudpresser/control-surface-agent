@@ -9,25 +9,24 @@ The framework is modeled as a control loop rather than as a simple workflow runn
 Telemetry, causality, and runtime routing are therefore core concerns, not secondary
 implementation details.
 
-As workflows become distributed and agent execution becomes more varied, static model
-selection will not be sufficient. The system needs a telemetry layer that senses the runtime,
-an event model that preserves causal explanation, and a routing layer that adapts execution
-choices based on system signals.
+As execution systems become more varied, static model selection will not be sufficient. The
+system needs a telemetry layer that senses the execution layer, an event model that preserves
+causal explanation, and a routing layer that adapts execution choices based on system signals.
 
 Evals live inside telemetry for now. Routing consumes eval-derived signals but does not own
 eval execution logic.
 
 ## Decision
 
-The framework will use a normalized event stream as the canonical model for runtime facts and
+The framework will use a normalized event stream as the canonical model for execution facts and
 control-loop causality.
 
 Routing is defined as runtime policy-based selection of models, execution paths, and
 escalation behaviors using telemetry-derived system signals.
 
 Telemetry is the sensing layer of the control loop. Routing is the decision layer of the
-control loop. The runtime is the actuation layer. Remediation is a corrective control action
-that may be triggered by operators or by policy.
+control loop. The execution layer is the actuation layer. Remediation is a corrective control
+action that may be triggered by operators or by policy.
 
 The event taxonomy may evolve, but every adapter and control-plane component must emit enough
 normalized metadata to preserve causality across the stack.
@@ -37,7 +36,7 @@ normalized metadata to preserve causality across the stack.
 The normalized event stream is the framework's source of truth for:
 
 - execution lifecycle facts
-- causal relationships between runtime and orchestration decisions
+- causal relationships between execution and orchestration decisions
 - telemetry-hosted eval results
 - routing inputs and routing outcomes
 - remediation triggers and remediation outcomes
@@ -47,8 +46,9 @@ The normalized event stream is the framework's source of truth for:
 - external governance, evaluation, or approval references when present
 - operator interventions that change the control path
 
-This event model is framework-native. It must not be replaced by runtime-specific or
-vendor-specific event semantics.
+This event model is framework-native. It normalizes signals from execution systems such as
+Strands, LangGraph, LangChain, or custom loops. It must not be replaced by framework-specific
+or vendor-specific event semantics.
 
 ## Minimum Causality Fields
 
@@ -96,7 +96,7 @@ observability data.
 
 The causal chain for broader system evolution should be representable as:
 
-- runtime signal
+- execution signal
 - remediation action
 - escalation decision
 - explicit scope selection
@@ -124,7 +124,7 @@ Routing is not:
 - infrastructure load balancing
 - the owner of eval execution logic
 
-Telemetry owns runtime facts, eval outputs, causal event history, and audit traces.
+Telemetry owns execution facts, eval outputs, causal event history, and audit traces.
 Workflows define the allowed execution structure. Agents execute work. Routing chooses among
 the allowed runtime options based on policy and current signals.
 
@@ -132,9 +132,9 @@ the allowed runtime options based on policy and current signals.
 
 OpenTelemetry fits this architecture as the cross-stack tracing and observability layer.
 
-Every service and worker should propagate trace context so that a single run can be followed
-across control plane, runtime adapter, workers, remediation agents, product clients,
-dashboard clients, and supporting services.
+Every service, client, and wrapped execution system should propagate trace context so that a
+single run can be followed across control plane, execution adapters, remediation agents,
+product clients, dashboard clients, and supporting services.
 
 OpenTelemetry complements the normalized event model by providing:
 

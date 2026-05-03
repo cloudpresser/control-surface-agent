@@ -7,7 +7,7 @@
 
 Invoking agents from the dashboard is useful for testing and supervision, but it is not a
 sufficient execution model for the framework. The framework must integrate cleanly into real
-products while still supporting the control surface as a first-class runtime client.
+products while still supporting the control surface as a first-class control client.
 
 The system must also distinguish between workflow-bound human input during execution and
 broader supervisory control over runs. Those concerns share a common event model, but they do
@@ -15,18 +15,23 @@ not have the same timing or structure.
 
 ## Decision
 
-The framework will expose a transport-neutral execution and control model that supports both
+The framework will expose a transport-neutral control model over runs that supports both
 product integrations and dashboard-driven supervision.
 
-The execution model must support:
+The control model must support:
 
-- starting a run with intent or input
+- starting or attaching to a run with intent or input
 - receiving streamed run and step events
 - responding to workflow-bound gates
 - issuing supervisory control actions over active or completed runs
 - querying, resuming, and cancelling runs
 
-The dashboard is one control client over this model. Product clients are another.
+The dashboard is one control client over this model. Product clients, wrapped execution
+adapters, and internal automation are others.
+
+The framework does not require teams to replace the native execution API of Strands,
+LangGraph, LangChain, or a custom loop on day one. Initial integrations may wrap those systems
+and project their runs into the control layer.
 
 ## Workflow-Bound Control
 
@@ -74,7 +79,8 @@ but it is not limited to predefined gates inside workflow definitions.
 
 ## Event and Control Semantics
 
-The execution API must preserve a unified control model across clients.
+The execution control API must preserve a unified control model across clients and wrapped
+execution systems.
 
 That means:
 
@@ -100,6 +106,6 @@ particular wire protocol.
 ## Migration Notes
 
 The current dashboard-triggered execution flow can remain as an early control client while the
-framework evolves a more general execution API. Future work should ensure that product-facing
-control and dashboard-facing control remain different clients over the same underlying runtime
-model rather than diverging into separate execution paths.
+framework evolves a more general control API. Future work should ensure that product-facing
+control, dashboard-facing control, and wrapped execution systems remain different clients over
+the same underlying control model rather than diverging into separate execution paths.

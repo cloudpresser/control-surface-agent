@@ -6,15 +6,15 @@
 ## Context
 
 The current prototype uses a single canonical workflow encoded directly in the planner and
-backend execution loop. That is enough for one scenario, but the target framework must support
-custom workflows without turning each new workflow into a fork of the framework.
+backend execution loop. That is enough for one scenario, but the target control layer must
+support custom workflows without turning each new control policy into a fork of the framework.
 
 The system also needs to support operator intervention, remediation paths, eval hook points,
 and runtime routing decisions. Those concerns cannot remain hidden in ad hoc imperative logic.
 
 All durable behavior is defined in code. Workflow structure, gates, routing allowances,
 remediation entry points, and related control semantics should remain versioned, repo-visible,
-and reviewable as code-defined behavior.
+and reviewable as code-defined behavior around an execution system.
 
 ## Decision
 
@@ -27,6 +27,9 @@ plane.
 
 Workflows define structured execution and workflow-bound human control. They do not need to
 encode the entire supervisory surface of the system.
+
+A workflow definition may wrap or describe an existing flow from Strands, LangGraph,
+LangChain, or a custom loop rather than replace that framework's native programming model.
 
 ## Workflow Model
 

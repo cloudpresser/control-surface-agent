@@ -1,7 +1,8 @@
 # Architecture Decision Records
 
 This directory captures the architectural decisions that move `control-surface-agent`
-from a single-run thesis prototype toward a distributed agent systems framework.
+from a single-run thesis prototype toward a control layer for agent systems that can wrap
+existing execution frameworks and runtimes.
 
 ## Status Key
 
@@ -11,7 +12,7 @@ from a single-run thesis prototype toward a distributed agent systems framework.
 
 ## ADRs
 
-- [0001: Distributed Agent Runtime and Sandboxing](0001-distributed-agent-runtime-and-sandboxing.md)
+- [0001: Execution Integration and Control Contracts](0001-execution-integration-and-control-contracts.md)
 - [0002: Domain Boundaries and Bounded Contexts](0002-domain-boundaries-and-bounded-contexts.md)
 - [0003: Code-Defined Workflow Definitions](0003-code-defined-workflow-definitions.md)
 - [0004: Dashboard for Distributed Runs and Remediation](0004-dashboard-for-distributed-runs-and-remediation.md)

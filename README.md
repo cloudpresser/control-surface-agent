@@ -6,6 +6,9 @@ This repository is a thesis artifact, not a chatbot demo. It demonstrates a boun
 
 A control surface for keeping AI decision systems reliable after they have been declared safe enough to deploy.
 
+This does not replace your agent framework. It wraps systems built with Strands, LangGraph,
+LangChain, or custom loops with control, observability, and learning.
+
 The reasoning steps are agentic. They use OpenAI in the same bounded pattern used in `agent-memory-failure-demo`: a shared client/config layer, explicit prompts per step, strict structured outputs, and deterministic tool/state orchestration around the model calls.
 
 ## What This Is Really About
@@ -17,6 +20,21 @@ This repository asks a different question: how do you keep an agentic system rel
 In production, reliability is not a static label. It is a continuous property, maintained through visibility into runs, reconciliation between intended and observed behavior, operator intervention when needed, and feedback loops that improve future executions.
 
 **Safety in staging is a checkpoint. Reliability in production is a continuous control problem.**
+
+This is what systems evolve into when verification, observability, and human-in-the-loop are
+taken seriously.
+
+## Adoption Path
+
+This system is designed to be adopted incrementally:
+
+1. Add verification and telemetry to an existing agent loop
+2. Introduce pause and human gating for low-confidence cases
+3. Capture remediation as structured signals
+4. Use signals to influence routing decisions
+5. Extract shared control logic into a dedicated control layer only when complexity justifies it
+
+You do not need to adopt the full architecture upfront.
 
 ## 30-Second Walkthrough
 
@@ -136,8 +154,12 @@ Production reliability is a closed loop, not a pipeline.
 Short target-state overview:
 
 - [Architecture Overview](docs/architecture-overview.md)
-- [Roadmap](docs/roadmap.md) - from the thesis prototype to a distributed control system, with milestones for runtime, workflows, dashboard, and governance integration
+- [Roadmap](docs/roadmap.md) - from the thesis prototype to a control layer, with milestones for a Strands-first vertical slice, run-state projection, routing, and governance integration
 - [Architecture Decision Records](docs/adr/README.md)
+
+The target architecture is best understood as a control layer around agent execution, not as a
+replacement runtime. The first adoption path can wrap a real Strands loop and add verification,
+telemetry, gates, and remediation before any broader control plane extraction.
 
 ```text
                     ┌────────────────────┐

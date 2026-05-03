@@ -1,35 +1,62 @@
 # Architecture Overview
 
 This document summarizes the target architecture for `control-surface-agent` as it evolves
-from a single-run thesis prototype into a distributed agent control system.
+from a single-run thesis prototype into a control layer for agent systems.
 
 For the detailed decisions, see [`docs/adr/`](adr/README.md).
 
 ## Core Idea
 
-The framework is modeled as a control loop for distributed agent systems.
+The framework is best understood as a control layer around agent execution, not as a
+replacement runtime.
+
+It is designed to wrap systems built with Strands, LangGraph, LangChain, or custom loops and
+add verification, observability, human control, remediation, and learning.
+
+The framework is modeled as a control loop for agent systems.
 
 - telemetry senses runtime behavior
 - routing and orchestration decide what should happen next
-- the agent runtime executes work in sandboxed workers
+- an execution system performs the underlying agent work
 - remediation lets operators correct runs and shape future behavior
 - the dashboard exposes monitoring and supervisory control
 
-The framework is not just a workflow runner. It is meant to keep agent behavior legible,
-auditable, and correctable over time.
+This does not replace an agent framework. It wraps it with control, observability, and
+learning.
 
 ## Main Components
+
+### Execution System
+
+The execution system is whatever framework or loop already performs the agent work. That may be
+Strands, LangGraph, LangChain, a custom loop, or an internal orchestration system.
+
+The control layer depends on clear integration boundaries, not on ownership of the execution
+substrate.
 
 ### Control Plane
 
 The control plane owns workflow coordination, run state transitions, routing decisions,
 operator actions, and causal event handling.
 
-### Agent Runtime
+### Integration Boundaries
 
-Agents execute behind a narrow, event-driven runtime seam. Workers are sandboxed and
-independently scalable. The framework standardizes runtime semantics without locking itself to
-one substrate.
+The control layer integrates with execution systems through normalized boundaries such as:
+
+- run started, completed, failed, or cancelled
+- step, tool, or model events
+- verification and evaluation results
+- confidence and failure signals
+- workflow-bound gate requests and responses
+- remediation actions and outcomes
+
+The control layer returns or records:
+
+- projected run state
+- human gate decisions
+- routing outcomes
+- remediation and escalation records
+- causal links across the full control loop
 
 ### Code-Defined Workflows
 
@@ -39,8 +66,9 @@ repository.
 
 ### Telemetry and Causality
 
-The framework uses a normalized event model as the source of truth for runtime facts and causal
-traceability. This covers execution, routing, remediation, escalation, and operator actions.
+The framework uses a normalized event model as the source of truth for execution facts and
+causal traceability. This covers execution, routing, remediation, escalation, and operator
+actions.
 
 OpenTelemetry complements this with cross-stack tracing and observability.
 
@@ -58,6 +86,18 @@ The dashboard is a control client over the framework, not the execution boundary
 The framework does not own alignment or deployment governance. Instead, it emits structured
 artifacts that external systems can evaluate, approve, and apply through repository and
 delivery workflows.
+
+## Adoption Path
+
+This architecture is intended to be adopted incrementally.
+
+1. Add verification and telemetry around an existing agent loop
+2. Introduce pause and human gating for low-confidence cases
+3. Capture remediation as a structured signal
+4. Use signals to influence routing and retries
+5. Extract shared control logic into a dedicated control layer when complexity justifies it
+
+You do not adopt the full architecture upfront.
 
 ## Human Control
 
@@ -97,8 +137,9 @@ single-page control surface.
 
 The target architecture extends that prototype toward:
 
-- distributed sandboxed agents
-- event-driven execution and backpressure-aware control
+- a wrapped existing execution system such as Strands
+- event-driven control and run-state projection
 - code-defined custom workflows
 - product integrations beyond the dashboard
 - remediation-driven system evolution with external governance
+- optional distributed execution adapters later when scale requires them

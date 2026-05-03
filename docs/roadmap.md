@@ -1,7 +1,7 @@
 # Roadmap
 
 This roadmap describes the intended evolution of `control-surface-agent` from the current
-single-run prototype into a distributed control system for agentic software.
+single-run prototype into a control layer for agent systems.
 
 It is organized around milestones rather than exact dates. The goal is to make the sequence of
 architectural work explicit without pretending the implementation order is already fixed in
@@ -21,12 +21,25 @@ It currently demonstrates:
 
 The target state is larger:
 
-- distributed sandboxed agents
-- event-driven execution
+- wrapped execution systems such as Strands
+- event-driven control and run-state projection
 - code-defined custom workflows
 - product-facing execution APIs beyond the dashboard
 - remediation-driven system evolution
 - external governance integration
+
+## Adoption Path
+
+Teams should be able to adopt the framework incrementally:
+
+1. add verification and telemetry around an existing loop
+2. introduce pause and human gating for low-confidence cases
+3. capture remediation as structured signals
+4. use signals to influence routing decisions
+5. extract shared control logic into a dedicated control layer when needed
+
+The roadmap below describes the evolution of the framework itself. It is not a claim that teams
+must adopt the full target architecture upfront.
 
 ## Milestones
 
@@ -47,110 +60,124 @@ Exit criteria:
 
 - the repo remains useful as a compact end-to-end demonstration of supervised agent execution
 
-### Milestone 1: Architecture and Runtime Contracts
+### Milestone 1: Wrap a Real Strands Loop
 
 Goal:
 
-- define the architectural seams needed for a distributed control system
+- prove the control-layer thesis around an existing framework rather than a replacement runtime
 
 Scope:
 
-- ADRs for runtime, workflows, telemetry, dashboard, execution control, and remediation
-- narrow event-driven `AgentRuntime` seam
-- normalized causal event model
-- transport-neutral execution and human-control model
+- choose one real Strands loop as the example integration target
+- capture run lifecycle, tool, and model events
+- normalize those events into the framework event model
+- build a minimal run-state projection
 
 Exit criteria:
 
-- the target architecture is documented clearly enough to guide refactoring work
+- a real Strands run can be observed as a structured run through the control layer
 
-### Milestone 2: Event-Driven Control Plane
+### Milestone 2: Verification and Telemetry Wedge
 
 Goal:
 
-- evolve the monolithic execution loop into an event-driven control plane
+- make the wrapped loop useful without requiring much architectural change
 
 Scope:
 
-- explicit run lifecycle events
-- queue-aware orchestration and backpressure handling
-- pause and resume semantics for workflow-bound gates
-- causal linkage across control actions, runtime events, and operator actions
+- add verification steps to the wrapped Strands loop
+- emit confidence scores and failure reasons
+- emit a structured trace of tool calls and major decisions
+- establish causal linkage between execution events and projected run state
 
 Exit criteria:
 
-- runs can progress through an event-driven control path rather than only an in-process loop
+- low-confidence or failed runs can be identified from signals alone
 
-### Milestone 3: Sandboxed Distributed Agent Runtime
+### Milestone 3: Human Gate and Remediation Signal
 
 Goal:
 
-- execute agents as independently scalable sandboxed workers
+- add trust boundaries and capture repeated operational pain
 
 Scope:
 
-- runtime adapter implementation behind the `AgentRuntime` contract
-- worker lifecycle events
-- cancellation, admission, and rejection signals
-- substrate-specific execution hidden behind framework-native runtime semantics
+- confidence threshold to pause or approval gate
+- operator action captured as a structured remediation record
+- remediation reasons normalized into the event model
 
 Exit criteria:
 
-- at least one sandboxed distributed runtime path exists without changing workflow semantics
+- human approval and remediation signals are visible in projected run state
 
-### Milestone 4: Code-Defined Workflow Framework
+### Milestone 4: Run-State Projection and Dashboard Slice
 
 Goal:
 
-- move from one canonical workflow to a reusable workflow framework
+- make the control layer legible as an operational surface
 
 Scope:
 
-- workflow definitions in code
-- workflow-bound gate definitions
-- custom step graphs and routing allowances
-- repo-visible durable behavior rather than framework-owned mutable config
+- projected run timeline and current status
+- gate state and remediation history
+- lightweight dashboard or run viewer over the wrapped Strands example
+- ADRs and docs that reflect the control-layer framing
 
 Exit criteria:
 
-- new workflows can be added without forking the framework core
+- one wrapped Strands loop is inspectable end-to-end through the control layer
 
-### Milestone 5: Product-Facing Execution APIs
+### Milestone 5: Signal-Driven Routing
 
 Goal:
 
-- let real products invoke the framework directly, not only the dashboard
+- use observed signals to alter behavior without replacing the execution framework
 
 Scope:
 
-- control-plane APIs for starting runs and receiving events
-- workflow-bound synchronous HITL through paused execution
-- supervisory async control over active and completed runs
-- unified causality across product clients and dashboard clients
+- low confidence to alternate model, retrieval, or policy path
+- repeated remediation to stronger path or human gate
+- routing decisions logged causally in the event model
 
 Exit criteria:
 
-- the framework can serve as an execution/control layer for product integrations
+- the control layer can influence execution behavior from observed signals
 
-### Milestone 6: Dashboard for Distributed Operations
+### Milestone 6: Extract Shared Control Logic
 
 Goal:
 
-- evolve the UI from a single-run console into a distributed operations dashboard
+- centralize what is repeated across wrapped workflows
 
 Scope:
 
-- many-run monitoring
-- agent and workflow visibility
-- remediation controls
-- escalation from run remediation into system evolution
-- visibility into `evolution candidate` and `repo_change` outcomes
+- reusable gate logic
+- reusable remediation projection logic
+- reusable routing policy logic
+- normalized run-state projection contracts
 
 Exit criteria:
 
-- the dashboard can supervise distributed runs rather than only one local scenario
+- multiple wrapped loops can share common control behavior
 
-### Milestone 7: Remediation-Driven System Evolution
+### Milestone 7: Generalized Control APIs
+
+Goal:
+
+- expose the control layer to products and supervisory clients
+
+Scope:
+
+- transport-neutral control semantics
+- product-facing control clients
+- dashboard clients
+- query, resume, cancel, and gate responses across the same control model
+
+Exit criteria:
+
+- the control layer is usable by both product and dashboard clients
+
+### Milestone 8: Remediation-Driven System Evolution
 
 Goal:
 
@@ -167,18 +194,19 @@ Exit criteria:
 
 - the framework can turn observed runtime issues into structured, reviewable evolution outputs
 
-### Milestone 8: External Governance and Evaluation Integration
+### Milestone 9: External Governance and Optional Distributed Adapters
 
 Goal:
 
-- integrate with external systems that evaluate and approve broader behavior changes
+- integrate with external governance while keeping distributed execution optional and
+  implementation-specific
 
 Scope:
 
 - export of structured evolution artifacts
 - references to external evaluation, approval, and governance state
 - documented golden paths for repository and governance automation
-- causal linkage from runtime incident to external review outcome
+- optional adapters for more distributed execution topologies when scale requires them
 
 Exit criteria:
 
@@ -188,7 +216,7 @@ Exit criteria:
 ## Guiding Principles
 
 - all durable behavior is defined in code
-- the framework should own runtime control semantics, not a mutable config store
+- the framework should own control semantics, not a mutable config store
 - telemetry and causality are core concerns, not optional add-ons
 - remediation is both a runtime correction mechanism and the start of broader system evolution
 - alignment and deployment governance should integrate externally rather than being fully owned
@@ -198,10 +226,10 @@ Exit criteria:
 
 The near-term focus should stay on the parts that define the framework's identity:
 
-- refactoring toward an event-driven control plane
-- establishing the runtime and event contracts
-- making workflows and human-control modes explicit
-- preserving a clean boundary between runtime control and external governance
+- wrapping a real Strands loop
+- establishing the event model and run-state projection
+- making verification, gates, and remediation explicit
+- preserving a clean boundary between control and external governance
 
 That keeps the project focused on control-system infrastructure rather than expanding too early
 into a full governance platform.

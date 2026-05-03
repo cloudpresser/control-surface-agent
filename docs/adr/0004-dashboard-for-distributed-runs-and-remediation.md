@@ -7,18 +7,19 @@
 
 The current frontend is a single-run operator console for a bounded decision workflow. It
 proves the control-surface thesis, but the intended product is broader: an operational
-dashboard for distributed agent runs, runtime visibility, and intervention.
+dashboard for supervised runs, runtime visibility, and intervention across wrapped execution
+systems.
 
-As agents and workflows become code-defined and distributed, the frontend must stop thinking
-primarily in terms of one local execution session and instead present the health and progress
-of many runs, many agents, and many remediation opportunities.
+As agents and workflows become code-defined and more operationally important, the frontend must
+stop thinking primarily in terms of one local execution session and instead present the health
+and progress of many runs, many workflows, and many remediation opportunities.
 
 The dashboard is not the execution boundary of the framework. It is one control client over a
-broader runtime and event model that must also integrate cleanly into real products.
+broader control layer and event model that must also integrate cleanly into real products.
 
 ## Decision
 
-The frontend will evolve into a dashboard for monitoring distributed agent runs and executing
+The frontend will evolve into a dashboard for monitoring supervised runs and executing
 remediation actions.
 
 The dashboard is an operations and supervisory control client, not a chat interface.
@@ -37,7 +38,8 @@ The dashboard should model and visualize at least:
 - incidents, drift signals, and escalations
 
 The dashboard should also make code-defined behavior legible by linking active runs to the
-workflow versions and runtime policies that shaped them.
+workflow versions and runtime policies that shaped them, even when the underlying execution is
+owned by another framework such as Strands.
 
 ## Remediation Model
 
@@ -68,7 +70,7 @@ track whether the escalation yielded an `evolution candidate` or a rendered `rep
 
 ## Dashboard Responsibilities
 
-- monitor active and historical distributed runs
+- monitor active and historical runs across wrapped execution systems
 - surface blocked, failed, degraded, or drifting executions
 - provide entry points for remediation actions
 - support escalation from run remediation into system evolution
@@ -106,8 +108,8 @@ This ADR does not define:
 The dashboard is not the final approval authority for external governance and is not the
 deployment authority for code-defined changes.
 
-Those can be added later without changing the decision that the dashboard is centered on
-distributed run monitoring and remediation.
+Those can be added later without changing the decision that the dashboard is centered on run
+monitoring, remediation, and supervisory control.
 
 ## Migration Notes
 
